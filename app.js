@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const connectDB = require('./config/db');
-const rateLimiter = require('./middleware/rateLimiter');
+const { authRateLimiter, qrRateLimiter, generalRateLimiter } = require('./middleware/rateLimiter');
+
 require('dotenv').config(); // Load environment variables
 
 // Import routes
@@ -20,7 +21,7 @@ connectDB();
 // Apply middleware
 app.use(cors()); // Enable cross-origin requests
 app.use(bodyParser.json()); // Parse incoming JSON requests
-app.use(rateLimiter); // Apply rate limiter globally
+app.use(generalRateLimiter); // Apply rate limiter globally
 
 // API Routes
 app.use('/auth', userRoutes); // Authentication routes

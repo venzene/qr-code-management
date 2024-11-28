@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const userService = require('../services/userService');
+const { authRateLimiter, qrRateLimiter, generalRateLimiter } = require('../middleware/rateLimiter');
 
 // Signup Route
-router.post('/signup', async (req, res) => {
+router.post('/signup', authRateLimiter, async (req, res) => {
   try {
     const { username, email, password } = req.body;
     const newUser = await userService.signup(username, email, password);
@@ -14,7 +15,7 @@ router.post('/signup', async (req, res) => {
 });
 
 // Login Route
-router.post('/login', async (req, res) => {
+router.post('/login', authRateLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     const result = await userService.login(email, password);

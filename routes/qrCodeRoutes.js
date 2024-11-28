@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const qrCodeService = require('../services/qrCodeService');
-const authenticate = require('../middleware/authenticate'); // Middleware for user authentication
+const authenticate = require('../middleware/authenticate');
+const { authRateLimiter, qrRateLimiter, generalRateLimiter } = require('../middleware/rateLimiter');
 
 // Generate Static QR Code
-router.post('/static', authenticate, async (req, res) => {
+router.post('/static', qrRateLimiter, authenticate, async (req, res) => {
   try {
     const { initialURL, metadata } = req.body;
     const qrCode = await qrCodeService.generateStaticQRCode(req.user.id, initialURL, metadata);
@@ -15,7 +16,7 @@ router.post('/static', authenticate, async (req, res) => {
 });
 
 // Generate Dynamic QR Code
-router.post('/dynamic', authenticate, async (req, res) => {
+router.post('/dynamic', qrRateLimiter, authenticate, async (req, res) => {
   try {
     const { initialURL, metadata } = req.body;
     const qrCode = await qrCodeService.generateDynamicQRCode(req.user.id, initialURL, metadata);
@@ -38,7 +39,8 @@ router.put('/:qrID/update', authenticate, async (req, res) => {
 });
 
 // Get QR Code Details
-router.get('/:qrID', authenticate, async (req, res) => {
+router.get('/:qrID', generalRateLimiter, authenticate, async (req, res) => {
+  console.log("im here");
   try {
     const { qrID } = req.params;
     const qrCode = await qrCodeService.getQRCodeDetails(qrID);
@@ -49,7 +51,7 @@ router.get('/:qrID', authenticate, async (req, res) => {
 });
 
 // List QR Codes by User
-router.get('/my-codes', authenticate, async (req, res) => {
+router.get('/mycodes/all', authenticate, async (req, res) => {
   try {
     const qrCodes = await qrCodeService.listQRCodesByUser(req.user.id);
     res.status(200).json(qrCodes);
